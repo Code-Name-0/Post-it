@@ -31,19 +31,12 @@ app.use(cookieParser());
 // ── Serve static frontend files (production) ───────────────────────────────────
 if (isProd) {
   const frontendBuild = path.join(__dirname, '../frontend/dist');
-  const frontendBuildAlt = path.join(process.cwd(), 'frontend/dist');
-
-  let distPath = frontendBuild;
-  if (require('fs').existsSync(frontendBuildAlt)) {
-    distPath = frontendBuildAlt;
-  }
-
-  console.log(`📁 Looking for frontend build at: ${distPath}`);
+  console.log(`📁 Looking for frontend build at: ${frontendBuild}`);
 
   const fs = require('fs');
-  if (fs.existsSync(distPath)) {
+  if (fs.existsSync(frontendBuild)) {
     console.log(`✅ Frontend dist folder found!`);
-    app.use(express.static(distPath));
+    app.use(express.static(frontendBuild));
 
     // Serve index.html for React Router
     app.get('*', (req, res, next) => {
@@ -51,12 +44,11 @@ if (isProd) {
       if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) {
         return next();
       }
-      res.sendFile(path.join(distPath, 'index.html'));
+      res.sendFile(path.join(frontendBuild, 'index.html'));
     });
   } else {
-    console.error(`❌ ERROR: Frontend dist folder NOT found at ${distPath}`);
-    console.log(`   Tried: ${frontendBuild}`);
-    console.log(`   Also tried: ${frontendBuildAlt}`);
+    console.error(`❌ ERROR: Frontend dist folder NOT found at ${frontendBuild}`);
+    console.log(`   This means the frontend build failed or wasn't copied.`);
   }
 }
 
@@ -77,14 +69,9 @@ app.use('/api/admin', adminRoutes);
 // ── Démarrage après connexion DB ───────────────────────────────────────────────
 connectDB().then(async () => {
   await seedDefaults();
-  startServer();
-}).catch(err => {
-  console.error('⚠️  MongoDB connection failed, but starting server anyway to serve frontend...');
-  console.error('Database error:', err.message);
-  startServer();
-});
 
-function startServer() {
+  // Railway provides the PORT environment variable
+  // HTTPS is handled by Railway's load balancer
   const port = process.env.PORT || 3001;
   const httpServer = http.createServer(app);
   initSocket(httpServer);
@@ -93,25 +80,21 @@ function startServer() {
     console.log(`✅ Server running on port ${port}`);
     console.log(`NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
   });
-}
+});
 
 async function seedDefaults() {
-  try {
-    const Board = require('./models/Board');
-    const User = require('./models/User');
-    const bcrypt = require('bcrypt');
+  const Board = require('./models/Board');
+  const User = require('./models/User');
+  const bcrypt = require('bcrypt');
 
-    if (!(await Board.findOne({ slug: 'default' }))) {
-      await Board.create({ slug: 'default', name: 'Tableau principal' });
-      console.log('Seed : board "default" créé');
-    }
+  if (!(await Board.findOne({ slug: 'default' }))) {
+    await Board.create({ slug: 'default', name: 'Tableau principal' });
+    console.log('Seed : board "default" créé');
+  }
 
-    if (!(await User.findOne({ username: 'guest' }))) {
-      const hashed = await bcrypt.hash('guest_system_account', 12);
-      await User.create({ username: 'guest', password: hashed, role: 'guest' });
-      console.log('Seed : utilisateur "guest" créé');
-    }
-  } catch (err) {
-    console.error('⚠️  Could not seed defaults:', err.message);
+  if (!(await User.findOne({ username: 'guest' }))) {
+    const hashed = await bcrypt.hash('guest_system_account', 12);
+    await User.create({ username: 'guest', password: hashed, role: 'guest' });
+    console.log('Seed : utilisateur "guest" créé');
   }
 }
