@@ -11,17 +11,14 @@ async function seed() {
     try {
         console.log('🌱 Starting seed...');
 
-        // Connect to MongoDB
         await mongoose.connect(process.env.MONGO_URI);
         console.log('✅ Connected to MongoDB');
 
-        // Clear existing data
         console.log('🧹 Clearing existing data...');
         await User.deleteMany({});
         await Board.deleteMany({});
         await PostIt.deleteMany({});
 
-        // Create boards
         console.log('📋 Creating boards...');
         const defaultBoard = await Board.create({
             slug: 'default',
@@ -35,7 +32,6 @@ async function seed() {
         });
         console.log(`✅ Created board: ${teamBoard.name}`);
 
-        // Create users
         console.log('👥 Creating users...');
 
         const adminUser = await User.create({
@@ -59,7 +55,6 @@ async function seed() {
         });
         console.log(`✅ Created guest user: ${guestUser.username}`);
 
-        // Create sample posts
         console.log('📝 Creating sample posts...');
 
         const posts = [

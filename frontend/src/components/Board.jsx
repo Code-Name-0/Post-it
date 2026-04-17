@@ -99,7 +99,6 @@ export default function Board({ boardId, boardName }) {
   return (
     <div style={s.wrapper}>
 
-      {/* ── Header ── */}
       <div style={s.header}>
         <div style={s.headerLeft}>
           <Square2StackIcon width={18} height={18} color="#64748b" />
@@ -129,7 +128,6 @@ export default function Board({ boardId, boardName }) {
         </div>
       </div>
 
-      {/* ── Zone tableau blanche ── */}
       <div
         ref={boardRef}
         className="board-bg"
@@ -141,7 +139,6 @@ export default function Board({ boardId, boardName }) {
             onMove={handleMove} onDelete={handleDelete} onEdit={handleEdit} />
         ))}
 
-        {/* ── Popup création ── */}
         {pendingPos && (
           <div
             style={{
@@ -180,7 +177,6 @@ export default function Board({ boardId, boardName }) {
           </div>
         )}
 
-        {/* ── État vide ── */}
         {postits.length === 0 && !pendingPos && (
           <div style={s.empty}>
             <div style={s.emptyIcon}>
@@ -243,7 +239,6 @@ const s = {
     cursor: 'pointer',
   },
 
-  /* ── Tableau blanc ── */
   board: {
     flex: 1,
     position: 'relative',
@@ -254,7 +249,6 @@ const s = {
     cursor: 'crosshair',
   },
 
-  /* ── État vide ── */
   empty: {
     position: 'absolute',
     top: '50%',
@@ -267,7 +261,6 @@ const s = {
   emptyTitle: { margin: '0 0 6px', fontSize: 15, fontWeight: 600, color: '#94a3b8' },
   emptySub: { margin: 0, fontSize: 13, color: '#cbd5e1', maxWidth: 260, lineHeight: 1.6 },
 
-  /* ── Popup création ── */
   popup: {
     position: 'absolute',
     background: '#fff',

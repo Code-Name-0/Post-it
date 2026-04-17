@@ -1,15 +1,11 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-/**
- * Formulaire de connexion réutilisable.
- * Utilisé dans la Navbar pour une connexion inline.
- */
 export default function LoginForm({ onSuccess }) {
   const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error,    setError]    = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,8 +44,8 @@ export default function LoginForm({ onSuccess }) {
 }
 
 const styles = {
-  form:  { display: 'flex', alignItems: 'center', gap: 6 },
+  form: { display: 'flex', alignItems: 'center', gap: 6 },
   input: { padding: '4px 8px', borderRadius: 4, border: 'none', fontSize: 13, height: 30 },
-  btn:   { padding: '4px 12px', borderRadius: 4, background: '#FFEB3B', border: 'none', cursor: 'pointer', fontWeight: 'bold', height: 30 },
+  btn: { padding: '4px 12px', borderRadius: 4, background: '#FFEB3B', border: 'none', cursor: 'pointer', fontWeight: 'bold', height: 30 },
   error: { color: '#ff6b6b', fontSize: 12 },
 };

@@ -1,9 +1,8 @@
 const PostIt = require('../models/PostIt');
-const Board  = require('../models/Board');
-const { getIO }        = require('../socket');
+const Board = require('../models/Board');
+const { getIO } = require('../socket');
 const { getRoleLevel } = require('../middleware/roleCheck');
 
-// GET /api/liste/:boardId — accessible publiquement (guests peuvent lire)
 const listPostits = async (req, res) => {
   try {
     const postits = await PostIt.find({ board: req.params.boardId })
@@ -15,7 +14,6 @@ const listPostits = async (req, res) => {
   }
 };
 
-// POST /api/ajouter — role creator+
 const addPostit = async (req, res) => {
   const { text, x, y, boardId } = req.body;
   if (!text?.trim() || x === undefined || y === undefined || !boardId)
@@ -29,14 +27,13 @@ const addPostit = async (req, res) => {
       text: text.trim(),
       x,
       y,
-      z_index: Date.now(), // Les nouveaux post-its passent par-dessus les anciens
+      z_index: Date.now(),
       author: req.user._id,
       board: boardId,
     });
 
     const populated = await postit.populate('author', 'username role');
 
-    // Diffuse l'ajout à tous les clients du même tableau
     getIO().to(boardId).emit('postit:added', populated);
     res.status(201).json(populated);
   } catch {
@@ -44,7 +41,6 @@ const addPostit = async (req, res) => {
   }
 };
 
-// PUT /api/modifier/:id — role editor+ OU auteur du post-it
 const updatePostit = async (req, res) => {
   const { text } = req.body;
   if (!text?.trim()) return res.status(400).json({ error: 'Texte requis' });
@@ -53,7 +49,7 @@ const updatePostit = async (req, res) => {
     const postit = await PostIt.findById(req.params.id);
     if (!postit) return res.status(404).json({ error: 'Post-it introuvable' });
 
-    const isAuthor    = postit.author.toString() === req.user._id.toString();
+    const isAuthor = postit.author.toString() === req.user._id.toString();
     const isEditorPlus = getRoleLevel(req.user.role) >= getRoleLevel('editor');
 
     if (!isAuthor && !isEditorPlus)
@@ -70,19 +66,18 @@ const updatePostit = async (req, res) => {
   }
 };
 
-// DELETE /api/effacer/:id — role eraser+ OU auteur du post-it
 const deletePostit = async (req, res) => {
   try {
     const postit = await PostIt.findById(req.params.id);
     if (!postit) return res.status(404).json({ error: 'Post-it introuvable' });
 
-    const isAuthor    = postit.author.toString() === req.user._id.toString();
+    const isAuthor = postit.author.toString() === req.user._id.toString();
     const isEraserPlus = getRoleLevel(req.user.role) >= getRoleLevel('eraser');
 
     if (!isAuthor && !isEraserPlus)
       return res.status(403).json({ error: 'Non autorisé : vous devez être l\'auteur ou avoir le rôle eraser+' });
 
-    const boardId  = postit.board.toString();
+    const boardId = postit.board.toString();
     const postitId = postit._id.toString();
     await postit.deleteOne();
 
@@ -93,7 +88,6 @@ const deletePostit = async (req, res) => {
   }
 };
 
-// PUT /api/deplacer/:id — role creator+ ET auteur uniquement
 const movePostit = async (req, res) => {
   const { x, y } = req.body;
   if (x === undefined || y === undefined)
@@ -103,13 +97,12 @@ const movePostit = async (req, res) => {
     const postit = await PostIt.findById(req.params.id);
     if (!postit) return res.status(404).json({ error: 'Post-it introuvable' });
 
-    // Seul l'auteur peut déplacer son propre post-it (déjà filtré par requireRole('creator') dans la route)
     if (postit.author.toString() !== req.user._id.toString())
       return res.status(403).json({ error: 'Seul l\'auteur peut déplacer ce post-it' });
 
-    postit.x       = Math.max(0, x);
-    postit.y       = Math.max(0, y);
-    postit.z_index = Date.now(); // Remonte au premier plan au déplacement
+    postit.x = Math.max(0, x);
+    postit.y = Math.max(0, y);
+    postit.z_index = Date.now();
     await postit.save();
 
     const payload = { _id: postit._id, x: postit.x, y: postit.y, z_index: postit.z_index };

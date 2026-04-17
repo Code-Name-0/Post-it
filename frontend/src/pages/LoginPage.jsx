@@ -13,46 +13,45 @@ import { useAuth } from '../context/AuthContext';
 import './auth.css';
 
 const LABELS = [
-  { cls: 'auth-lc-1', title: 'Nouvelle idée',    sub: 'Tableau principal' },
-  { cls: 'auth-lc-2', title: 'Réunion à 14h',    sub: 'Équipe produit' },
-  { cls: 'auth-lc-3', title: 'Tâche terminée',   sub: 'Sprint n°4' },
-  { cls: 'auth-lc-4', title: 'Déploiement',      sub: 'Priorité haute' },
-  { cls: 'auth-lc-5', title: 'Fix bug login',    sub: 'En cours…' },
-  { cls: 'auth-lc-6', title: 'Brainstorming',    sub: 'Ce vendredi' },
+  { cls: 'auth-lc-1', title: 'Nouvelle idée', sub: 'Tableau principal' },
+  { cls: 'auth-lc-2', title: 'Réunion à 14h', sub: 'Équipe produit' },
+  { cls: 'auth-lc-3', title: 'Tâche terminée', sub: 'Sprint n°4' },
+  { cls: 'auth-lc-4', title: 'Déploiement', sub: 'Priorité haute' },
+  { cls: 'auth-lc-5', title: 'Fix bug login', sub: 'En cours…' },
+  { cls: 'auth-lc-6', title: 'Brainstorming', sub: 'Ce vendredi' },
 ];
 
 export default function LoginPage() {
   const { login, loginAsGuest } = useAuth();
   const navigate = useNavigate();
 
-  const [username,     setUsername]     = useState('');
-  const [password,     setPassword]     = useState('');
-  const [error,        setError]        = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [loadingLogin, setLoadingLogin] = useState(false);
   const [loadingGuest, setLoadingGuest] = useState(false);
-  const [showPass,     setShowPass]     = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setLoadingLogin(true);
-    try   { await login(username.trim(), password); navigate('/'); }
+    try { await login(username.trim(), password); navigate('/'); }
     catch (err) { setError(err.message); }
-    finally     { setLoadingLogin(false); }
+    finally { setLoadingLogin(false); }
   };
 
   const handleGuest = async () => {
     setError('');
     setLoadingGuest(true);
-    try   { await loginAsGuest(); navigate('/'); }
+    try { await loginAsGuest(); navigate('/'); }
     catch (err) { setError(err.message); }
-    finally     { setLoadingGuest(false); }
+    finally { setLoadingGuest(false); }
   };
 
   return (
     <div className="auth-page">
 
-      {/* Étiquettes style crayon */}
       {LABELS.map((l) => (
         <div key={l.cls} className={`auth-label-card ${l.cls}`}>
           <div className="auth-label-card-title">{l.title}</div>
@@ -60,16 +59,14 @@ export default function LoginPage() {
         </div>
       ))}
 
-      {/* Carte formulaire */}
       <div className="auth-card">
 
-        {/* En-tête */}
         <div className="auth-card-header">
           <div className="auth-card-logo">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
               stroke="#1e293b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-              <circle cx="12" cy="9" r="2.5"/>
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+              <circle cx="12" cy="9" r="2.5" />
             </svg>
           </div>
           <h2 className="auth-card-title">Connexion</h2>
@@ -77,7 +74,6 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleLogin}>
-          {/* Identifiant */}
           <div className="auth-field">
             <label className="auth-label">Identifiant</label>
             <div className="auth-input-wrap">
@@ -92,7 +88,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Mot de passe */}
           <div className="auth-field">
             <label className="auth-label">Mot de passe</label>
             <div className="auth-input-wrap">

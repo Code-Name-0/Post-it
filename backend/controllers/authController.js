@@ -2,7 +2,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Cookie settings for same-site dev and cross-site prod deployments
 const isProd = process.env.NODE_ENV === 'production';
 const cookieOpts = {
   httpOnly: true,
@@ -41,12 +40,10 @@ const login = async (req, res) => {
 
   try {
     const user = await User.findOne({ username });
-    // Même message d'erreur pour username inconnu et mauvais mot de passe (anti-énumération)
     if (!user || !(await bcrypt.compare(password, user.password)))
       return res.status(401).json({ error: 'Identifiants invalides' });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    // Le cookie est HTTP-only : jamais lisible par le JavaScript frontend
     res.cookie('token', token, cookieOpts);
     res.json({ user: { id: user._id, username: user.username, role: user.role } });
   } catch (err) {
@@ -71,7 +68,6 @@ const loginAsGuest = async (req, res) => {
   }
 };
 
-// Permet au frontend de récupérer l'utilisateur courant au chargement (via le cookie)
 const me = (req, res) => {
   if (!req.user) return res.json({ user: null });
   res.json({ user: { id: req.user._id, username: req.user.username, role: req.user.role } });

@@ -1,7 +1,6 @@
-const User             = require('../models/User');
+const User = require('../models/User');
 const { ROLE_HIERARCHY } = require('../middleware/roleCheck');
 
-// GET /api/admin/users — liste tous les utilisateurs (sans les mots de passe)
 const listUsers = async (req, res) => {
   try {
     const users = await User.find().select('-password').sort({ createdAt: -1 });
@@ -11,7 +10,6 @@ const listUsers = async (req, res) => {
   }
 };
 
-// PUT /api/admin/users/:id/role — change le rôle d'un utilisateur
 const updateUserRole = async (req, res) => {
   const { role } = req.body;
 
@@ -20,7 +18,6 @@ const updateUserRole = async (req, res) => {
       error: `Rôle invalide. Valeurs acceptées : ${ROLE_HIERARCHY.join(', ')}`,
     });
 
-  // Empêche un admin de rétrograder son propre compte
   if (req.params.id === req.user._id.toString())
     return res.status(403).json({ error: 'Vous ne pouvez pas modifier votre propre rôle' });
 

@@ -4,10 +4,8 @@ import { API_BASE_URL } from '../api.js';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  // undefined = chargement initial en cours, null = non connecté, object = connecté
   const [user, setUser] = useState(undefined);
 
-  // Vérifie l'état de session au chargement via le cookie HTTP-only
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/me`, { credentials: 'include' })
       .then((r) => r.json())
@@ -54,7 +52,6 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
-  // On n'affiche rien tant que la vérification initiale n'est pas terminée
   if (user === undefined) return null;
 
   return (

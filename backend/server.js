@@ -17,10 +17,8 @@ const adminRoutes = require('./routes/adminRoutes');
 const app = express();
 const isProd = process.env.NODE_ENV === 'production';
 
-// ── Sécurité des headers HTTP ──────────────────────────────────────────────────
 app.use(helmet());
 
-// ── CORS strict : autorise uniquement le frontend avec cookies ─────────────────
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
@@ -28,39 +26,10 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// ── Serve static frontend files (production) ───────────────────────────────────
 if (isProd) {
-  const frontendBuild = path.join(__dirname, '../frontend/dist');
-  const frontendBuildAlt = path.join(process.cwd(), 'frontend/dist');
-
-  let distPath = frontendBuild;
-  if (require('fs').existsSync(frontendBuildAlt)) {
-    distPath = frontendBuildAlt;
-  }
-
-  console.log(`📁 Looking for frontend build at: ${distPath}`);
-
-  const fs = require('fs');
-  if (fs.existsSync(distPath)) {
-    console.log(`✅ Frontend dist folder found!`);
-    app.use(express.static(distPath));
-
-    // Serve index.html for React Router
-    app.get('*', (req, res, next) => {
-      // Don't intercept API routes
-      if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) {
-        return next();
-      }
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-  } else {
-    console.error(`❌ ERROR: Frontend dist folder NOT found at ${distPath}`);
-    console.log(`   Tried: ${frontendBuild}`);
-    console.log(`   Also tried: ${frontendBuildAlt}`);
-  }
+  console.log('📱 Backend API only - Frontend deployed separately');
 }
 
-// ── HSTS : force HTTPS pour les futures requêtes (production uniquement) ───────
 if (isProd) {
   app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
@@ -68,13 +37,11 @@ if (isProd) {
   });
 }
 
-// ── Routes ─────────────────────────────────────────────────────────────────────
 app.use('/api', authRoutes);
 app.use('/api', boardRoutes);
 app.use('/api', postitRoutes);
 app.use('/api/admin', adminRoutes);
 
-// ── Démarrage après connexion DB ───────────────────────────────────────────────
 connectDB().then(async () => {
   await seedDefaults();
   startServer();

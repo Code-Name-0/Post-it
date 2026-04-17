@@ -58,7 +58,6 @@ export default function BoardPage({ slug: defaultSlug }) {
 
   return (
     <div style={styles.layout}>
-      {/* ── Sidebar tableaux ── */}
       <aside style={styles.sidebar}>
         <div style={styles.sideHeader}>
           <RectangleStackIcon width={13} height={13} color="#6b7280" />
@@ -106,7 +105,6 @@ export default function BoardPage({ slug: defaultSlug }) {
         )}
       </aside>
 
-      {/* ── Zone principale ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {error ? (
           <div style={{ padding: 24, color: '#e53e3e' }}>{error}</div>

@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// Hiérarchie croissante : guest < creator < editor < eraser < admin
 const ROLES = ['guest', 'creator', 'editor', 'eraser', 'admin'];
 
 const userSchema = new mongoose.Schema(
@@ -12,7 +11,6 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: 3,
     },
-    // Stocké haché par bcrypt — jamais en clair
     password: {
       type: String,
       required: true,
@@ -20,7 +18,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ROLES,
-      default: 'creator', // rôle par défaut à l'inscription
+      default: 'creator',
     },
   },
   { timestamps: true }

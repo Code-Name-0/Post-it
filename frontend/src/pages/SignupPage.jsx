@@ -14,47 +14,46 @@ import { useAuth } from '../context/AuthContext';
 import './auth.css';
 
 const LABELS = [
-  { cls: 'auth-lc-1', title: 'Bienvenue !',    sub: 'Créez votre espace' },
-  { cls: 'auth-lc-2', title: 'Rôle creator',   sub: 'Dès l\'inscription' },
-  { cls: 'auth-lc-3', title: 'Temps réel',      sub: 'Socket.IO' },
-  { cls: 'auth-lc-4', title: 'Sécurisé',        sub: 'Cookie HTTP-only' },
-  { cls: 'auth-lc-5', title: 'Collaboratif',    sub: 'Tableaux partagés' },
-  { cls: 'auth-lc-6', title: 'Gratuit',         sub: 'Sans email requis' },
+  { cls: 'auth-lc-1', title: 'Bienvenue !', sub: 'Créez votre espace' },
+  { cls: 'auth-lc-2', title: 'Rôle creator', sub: 'Dès l\'inscription' },
+  { cls: 'auth-lc-3', title: 'Temps réel', sub: 'Socket.IO' },
+  { cls: 'auth-lc-4', title: 'Sécurisé', sub: 'Cookie HTTP-only' },
+  { cls: 'auth-lc-5', title: 'Collaboratif', sub: 'Tableaux partagés' },
+  { cls: 'auth-lc-6', title: 'Gratuit', sub: 'Sans email requis' },
 ];
 
 export default function SignupPage() {
   const { signup } = useAuth();
-  const navigate   = useNavigate();
+  const navigate = useNavigate();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [confirm,  setConfirm]  = useState('');
-  const [error,    setError]    = useState('');
-  const [loading,  setLoading]  = useState(false);
+  const [confirm, setConfirm] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     if (password !== confirm) { setError('Les mots de passe ne correspondent pas'); return; }
-    if (password.length < 6)  { setError('Mot de passe trop court (minimum 6 caractères)'); return; }
+    if (password.length < 6) { setError('Mot de passe trop court (minimum 6 caractères)'); return; }
     setLoading(true);
-    try   { await signup(username.trim(), password); navigate('/'); }
+    try { await signup(username.trim(), password); navigate('/'); }
     catch (err) { setError(err.message); }
-    finally     { setLoading(false); }
+    finally { setLoading(false); }
   };
 
   const strength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : 3;
   const strengthLabel = ['', 'Faible', 'Moyen', 'Fort'];
   const strengthColor = ['', '#ef4444', '#f97316', '#22c55e'];
 
-  const passMatch    = confirm.length > 0 && password === confirm;
+  const passMatch = confirm.length > 0 && password === confirm;
   const passMismatch = confirm.length > 0 && password !== confirm;
 
   return (
     <div className="auth-page">
 
-      {/* Étiquettes style crayon */}
       {LABELS.map((l) => (
         <div key={l.cls} className={`auth-label-card ${l.cls}`}>
           <div className="auth-label-card-title">{l.title}</div>
@@ -62,16 +61,14 @@ export default function SignupPage() {
         </div>
       ))}
 
-      {/* Carte formulaire */}
       <div className="auth-card">
 
-        {/* En-tête */}
         <div className="auth-card-header">
           <div className="auth-card-logo">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
               stroke="#1e293b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-              <circle cx="12" cy="9" r="2.5"/>
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+              <circle cx="12" cy="9" r="2.5" />
             </svg>
           </div>
           <h2 className="auth-card-title">Créer un compte</h2>
@@ -79,7 +76,6 @@ export default function SignupPage() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Nom d'utilisateur */}
           <div className="auth-field">
             <label className="auth-label">Nom d'utilisateur</label>
             <div className="auth-input-wrap">
@@ -94,7 +90,6 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* Mot de passe */}
           <div className="auth-field">
             <label className="auth-label">Mot de passe</label>
             <div className="auth-input-wrap">
@@ -125,14 +120,13 @@ export default function SignupPage() {
             )}
           </div>
 
-          {/* Confirmation */}
           <div className="auth-field">
             <label className="auth-label">Confirmer le mot de passe</label>
             <div className="auth-input-wrap">
               <span className="auth-icon">
                 {passMatch
                   ? <CheckCircleIcon width={18} height={18} style={{ color: '#22c55e' }} />
-                  : <KeyIcon         width={18} height={18} />}
+                  : <KeyIcon width={18} height={18} />}
               </span>
               <input
                 className="auth-input"
@@ -142,7 +136,7 @@ export default function SignupPage() {
                 placeholder="Répétez le mot de passe"
                 style={{
                   borderColor: passMismatch ? '#fca5a5' : passMatch ? '#86efac' : undefined,
-                  boxShadow:   passMatch    ? '0 0 0 3px rgba(34,197,94,0.1)' : undefined,
+                  boxShadow: passMatch ? '0 0 0 3px rgba(34,197,94,0.1)' : undefined,
                 }}
                 required
               />

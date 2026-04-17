@@ -17,7 +17,6 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../api.js';
 
-/* ── Définition des rôles ──────────────────────────────────────── */
 const ROLES = ['guest', 'creator', 'editor', 'eraser', 'admin'];
 
 const ROLE_META = {
@@ -53,7 +52,6 @@ const ROLE_META = {
   },
 };
 
-/* Matrice de permissions */
 const PERMISSIONS = [
   { label: 'Consulter les post-its', roles: ['guest', 'creator', 'editor', 'eraser', 'admin'] },
   { label: 'Créer des post-its', roles: ['creator', 'editor', 'eraser', 'admin'] },
@@ -63,7 +61,6 @@ const PERMISSIONS = [
   { label: 'Accès au panneau admin', roles: ['admin'] },
 ];
 
-/* ── Composant principal ───────────────────────────────────────── */
 export default function AdminPage() {
   const { user: me } = useAuth();
   const [users, setUsers] = useState([]);
@@ -104,7 +101,6 @@ export default function AdminPage() {
     <div style={s.page}>
       <div style={s.container}>
 
-        {/* ── En-tête ── */}
         <div style={s.pageHeader}>
           <div style={s.pageHeaderLeft}>
             <div style={s.pageTitleRow}>
@@ -117,7 +113,6 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
-          {/* Stat chips */}
           <div style={s.statsRow}>
             {ROLES.map((r) => {
               const m = ROLE_META[r];
@@ -133,7 +128,6 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* ── Alertes ── */}
         {error && (
           <div style={s.alertErr}>
             <ExclamationCircleIcon width={16} height={16} /> {error}
@@ -145,7 +139,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ── Grille des rôles ── */}
         <section style={s.section}>
           <h2 style={s.sectionTitle}>Niveaux de permission</h2>
           <p style={s.sectionDesc}>
@@ -191,7 +184,6 @@ export default function AdminPage() {
           </div>
         </section>
 
-        {/* ── Table utilisateurs ── */}
         <section style={s.section}>
           <div style={s.tableHeader}>
             <div>
@@ -232,7 +224,6 @@ export default function AdminPage() {
                         onMouseEnter={() => setHovered(u._id)}
                         onMouseLeave={() => setHovered(null)}
                       >
-                        {/* Utilisateur */}
                         <td style={s.td}>
                           <div style={s.userCell}>
                             <div style={{ ...s.avatar, background: m.color.bg, color: m.color.text, border: `1.5px solid ${m.color.border}` }}>
@@ -249,7 +240,6 @@ export default function AdminPage() {
                           </div>
                         </td>
 
-                        {/* Rôle actuel */}
                         <td style={s.td}>
                           <div style={{ ...s.rolePill, background: m.color.bg, border: `1.5px solid ${m.color.border}` }}>
                             <RIcon width={13} height={13} color={m.color.dot} />
@@ -257,7 +247,6 @@ export default function AdminPage() {
                           </div>
                         </td>
 
-                        {/* Permissions résumées */}
                         <td style={s.td}>
                           <div style={s.permDots}>
                             {PERMISSIONS.map((p) => {
@@ -273,7 +262,6 @@ export default function AdminPage() {
                           </div>
                         </td>
 
-                        {/* Changer le rôle */}
                         <td style={s.td}>
                           {isSelf ? (
                             <div style={s.lockedCell}>
@@ -305,12 +293,10 @@ export default function AdminPage() {
   );
 }
 
-/* ── Styles ─────────────────────────────────────────────────────── */
 const s = {
   page: { flex: 1, background: '#f8fafc', overflowY: 'auto', padding: '32px 24px' },
   container: { maxWidth: 1100, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 },
 
-  /* En-tête */
   pageHeader: {
     background: '#fff', borderRadius: 12, padding: '20px 24px',
     border: '1px solid #e2e8f0',
@@ -336,7 +322,6 @@ const s = {
   statCount: { fontSize: 15, fontWeight: 800 },
   statLabel: { fontSize: 11, fontWeight: 600, textTransform: 'capitalize' },
 
-  /* Alertes */
   alertErr: {
     display: 'flex', alignItems: 'center', gap: 8,
     background: '#fef2f2', border: '1.5px solid #fca5a5', color: '#dc2626',
@@ -348,12 +333,10 @@ const s = {
     padding: '11px 16px', borderRadius: 10, fontSize: 14,
   },
 
-  /* Sections */
   section: { display: 'flex', flexDirection: 'column', gap: 14 },
   sectionTitle: { margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' },
   sectionDesc: { margin: 0, fontSize: 13, color: '#64748b', lineHeight: 1.6 },
 
-  /* Grille des rôles */
   rolesGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))',
@@ -380,7 +363,6 @@ const s = {
   permIcon: { display: 'flex', alignItems: 'center', flexShrink: 0 },
   permLabel: { fontSize: 11, color: '#475569', lineHeight: 1.3 },
 
-  /* Table */
   tableHeader: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
   },
@@ -406,7 +388,6 @@ const s = {
   tr: { borderBottom: '1px solid #f1f5f9', transition: 'background 0.1s' },
   td: { padding: '13px 16px', verticalAlign: 'middle' },
 
-  /* Cellule utilisateur */
   userCell: { display: 'flex', alignItems: 'center', gap: 10 },
   avatar: {
     width: 34, height: 34, borderRadius: 8,
@@ -419,21 +400,17 @@ const s = {
     fontSize: 11, color: '#7c3aed', fontWeight: 600, marginTop: 2,
   },
 
-  /* Pill de rôle */
   rolePill: {
     display: 'inline-flex', alignItems: 'center', gap: 6,
     padding: '5px 11px', borderRadius: 20,
   },
 
-  /* Points de permission */
   permDots: { display: 'flex', gap: 5, alignItems: 'center' },
   permDot: { width: 8, height: 8, borderRadius: '50%' },
 
-  /* Cellule verrouillée */
   lockedCell: { display: 'flex', alignItems: 'center', gap: 6 },
   lockedLabel: { fontSize: 13, color: '#cbd5e1', fontStyle: 'italic' },
 
-  /* Select */
   select: {
     padding: '7px 10px', borderRadius: 8,
     border: '1.5px solid #e2e8f0', cursor: 'pointer',

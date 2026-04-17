@@ -1,14 +1,14 @@
 require('dotenv').config();
-const express      = require('express');
-const cors         = require('cors');
+const express = require('express');
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const helmet       = require('helmet');
+const helmet = require('helmet');
 
-const connectDB    = require('../db');
-const authRoutes   = require('../routes/authRoutes');
-const boardRoutes  = require('../routes/boardRoutes');
+const connectDB = require('../db');
+const authRoutes = require('../routes/authRoutes');
+const boardRoutes = require('../routes/boardRoutes');
 const postitRoutes = require('../routes/postitRoutes');
-const adminRoutes  = require('../routes/adminRoutes');
+const adminRoutes = require('../routes/adminRoutes');
 
 const app = express();
 
@@ -29,10 +29,9 @@ app.use('/api', boardRoutes);
 app.use('/api', postitRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Connexion DB + seed au démarrage à froid
 connectDB().then(async () => {
-  const Board  = require('../models/Board');
-  const User   = require('../models/User');
+  const Board = require('../models/Board');
+  const User = require('../models/User');
   const bcrypt = require('bcrypt');
 
   if (!(await Board.findOne({ slug: 'default' })))
