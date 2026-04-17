@@ -1,13 +1,7 @@
 {
-    "name": "social-postit",
-    "version": "1.0.0",
-    "description": "Full-stack Post-it collaboration app",
-    "private": true,
-    "scripts": {
-        "build": "npm --prefix frontend install && npm --prefix frontend run build && npm --prefix backend install",
-        "start": "npm --prefix backend start"
-    },
-    "engines": {
-        "node": ">=18.0.0"
-    }
+  "private": true,
+  "scripts": {
+    "start": "npm start --prefix backend",
+    "build": "npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend"
+  }
 }

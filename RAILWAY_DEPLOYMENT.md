@@ -67,11 +67,11 @@ Railway automatically deploys on GitHub push.
 ## How It Works
 
 ### Build Process
-1. Railway executes `npm run build`
-2. This runs `build.js` (Node.js script with better error handling)
-3. build.js installs frontend dependencies and builds to `frontend/dist/`
-4. build.js installs backend dependencies
-5. Frontend is ready to be served as static files
+1. Railway executes `npm run build` from root package.json
+2. This runs `bash build.sh` (shell script with explicit path handling)
+3. build.sh navigates to frontend, installs deps, builds to `dist/`
+4. build.sh navigates to backend, installs deps
+5. Frontend is ready to be served as static files by Express
 
 ### Runtime
 1. Railway runs `npm start` (starts backend)
