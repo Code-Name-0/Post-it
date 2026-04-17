@@ -26,7 +26,11 @@ export default function Board({ boardId, boardName }) {
 
   useEffect(() => {
     if (!boardId) return;
-    const socket = io({ path: '/socket.io', transports: ['websocket', 'polling'] });
+    const socket = io(API_BASE_URL, {
+      path: '/socket.io',
+      transports: ['websocket', 'polling'],
+      withCredentials: true,
+    });
     socketRef.current = socket;
     socket.emit('join:board', boardId);
     socket.on('postit:added', (p) => setPostits((prev) => [...prev, p]));
