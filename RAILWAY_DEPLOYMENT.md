@@ -1,159 +1,43 @@
-# Deployment Guide - Railway
+# Railway Deployment Configuration
 
-## Overview
-This setup deploys the entire Post-it application (backend + frontend) as a **single service** on Railway.
-
-## Architecture
-- **Backend**: Express.js (Node.js)
-- **Frontend**: React + Vite (built into `dist/` folder)
-- **Serving**: Backend serves frontend as static files + API routes
-- **Database**: MongoDB Atlas (cloud-hosted)
-
-## Step-by-Step Deployment
-
-### 1. Prepare MongoDB Atlas
-1. Create free account: [mongodb.com/cloud/atlas](https://mongodb.com/cloud/atlas)
-2. Create a free cluster (M0 tier)
-3. Create a database user with a password
-4. Get the connection string (looks like: `mongodb+srv://user:pass@cluster.mongodb.net/social-postit`)
-5. 
-mongodb+srv://root:<root>@cluster0.nsnausg.mongodb.net/?appName=Cluster0
-
-### 2. Create Railway Project
-1. Go to [railway.app](https://railway.app)
-2. Sign in with GitHub
-3. Create new project → "Deploy from GitHub repo"
-4. Select your Post-it repo
-
-### 3. Configure Environment Variables in Railway
-In Railway dashboard → Variables, add:
+## Environment Variables to Set in Railway:
 
 ```
-MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/social-postit
-JWT_SECRET=your-secret-min-32-chars (generate: openssl rand -hex 32)
 NODE_ENV=production
+PORT=3000
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/social-postit?retryWrites=true&w=majority
+JWT_SECRET=your_secret_key_min_32_characters_long
+CLIENT_URL=https://your-railway-app-url.railway.app
 ```
 
-(Leave `CLIENT_URL` empty - it will default to the Railway domain)
+## Important Notes:
 
-### 4. Configure Build Settings in Railway
+1. **MongoDB Setup**: You can use:
+   - Railway's built-in MongoDB service, or
+   - MongoDB Atlas (recommended for free tier)
+   - Connection string should be set in `MONGO_URI`
 
-Railway will automatically detect your `package.json` and use:
+2. **JWT_SECRET**: Generate a secure random string (min 32 characters)
+   - Command: `openssl rand -hex 32`
 
-- **Build Command**: `npm run build` (automatically from root package.json)
-- **Start Command**: `npm start` (automatically from root package.json)
+3. **CLIENT_URL**: Will be your Railway app's public URL
+   - Format: `https://your-app-name.railway.app`
 
-This runs:
-```bash
-# Build phase
-npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend
+4. **Build Process**: Railway will automatically:
+   - Install dependencies: `npm install`
+   - Build frontend: `npm run build:frontend`
+   - Start server: `npm start`
 
-# Start phase  
-npm start --prefix backend  (starts Express on PORT)
+## Procfile (optional, Railway auto-detects)
+```
+web: npm start
 ```
 
-No additional configuration needed!
+## What's Been Changed:
 
-### 5. Deploy
-Push to GitHub:
-```bash
-git add .
-git commit -m "Setup for Railway deployment"
-git push origin main
-```
-
-Railway automatically deploys on GitHub push.
-
-## How It Works
-
-### Build Process
-1. Railway executes `npm run build` from root package.json
-2. This runs `bash build.sh` (shell script with explicit path handling)
-3. build.sh navigates to frontend, installs deps, builds to `dist/`
-4. build.sh navigates to backend, installs deps
-5. Frontend is ready to be served as static files by Express
-
-### Runtime
-1. Railway runs `npm start` (starts backend)
-2. Backend server listens on `process.env.PORT` (Railway assigns dynamic port)
-3. Backend serves:
-   - API routes at `/api/*`
-   - Frontend static files at all other paths
-   - Socket.IO at `/socket.io`
-
-## Verification
-
-Once deployed, check:
-- ✅ Frontend loads at `https://your-railway-domain.up.railway.app/`
-- ✅ API works at `/api/boards`, `/api/me`, etc.
-- ✅ Real-time updates (Socket.IO) work
-- ✅ Login/signup creates users in MongoDB
-- ✅ Admin page accessible for admin users
-
-## Troubleshooting
-
-### Deployment fails
-- Check Railway logs: Dashboard → Deployments → View Logs
-- Verify `MONGO_URI` is correct and accessible
-- Ensure MongoDB Atlas IP whitelist includes Railway (should be `0.0.0.0/0`)
-
-### Frontend not loading
-- Verify `frontend/dist/` is built (check build logs)
-- Check that `server.js` correctly serves static files
-- Browser console: check `/api/me` response
-
-### API calls return 500
-- Check MongoDB connection string in logs
-- Verify `JWT_SECRET` is set
-- Check `NODE_ENV=production` is set
-
-## Architecture Diagram
-
-```
-┌─ Railway Platform ─────────────────────┐
-│                                        │
-│  Port $PORT (Dynamic)                  │
-│         │                              │
-│    ┌────▼──────────────────────┐      │
-│    │  Express Backend           │      │
-│    ├────────────────────────────┤      │
-│    │ ✓ API Routes (/api/*)      │      │
-│    │ ✓ Socket.IO (/socket.io)   │      │
-│    │ ✓ Static Files (frontend)  │      │
-│    │ ✓ JWT Auth (cookies)       │      │
-│    └────────┬───────────────────┘      │
-│             │                          │
-│    ┌────────▼──────────────────┐      │
-│    │  MongoDB Atlas             │      │
-│    │  (Cloud Database)          │      │
-│    └───────────────────────────┘      │
-│                                        │
-└────────────────────────────────────────┘
-```
-
-## Local Development (unchanged)
-
-```bash
-# Terminal 1: Backend
-cd backend
-npm install
-npm run dev          # Runs on localhost:3001
-
-# Terminal 2: Frontend
-cd frontend
-npm install
-npm run dev          # Runs on localhost:5173
-# Vite proxy redirects /api and /socket.io to localhost:3001
-```
-
-## Production Notes
-
-- **HTTPS**: Handled by Railway's reverse proxy automatically
-- **HSTS**: Enabled via `Strict-Transport-Security` header
-- **Cookies**: HTTP-only and secure flag set automatically in production
-- **CORS**: Configured to accept same-origin requests
-- **Certificates**: Not needed on Railway (uses platform SSL)
-
----
-
-For questions or issues, check Railway's [documentation](https://docs.railway.app).
+✅ Removed SSL certificate requirement
+✅ Backend now serves built frontend files in production
+✅ Port configuration uses Railway's PORT environment variable
+✅ Socket.IO configured for HTTP (Railway handles HTTPS at edge)
+✅ Added root package.json for coordinated builds
+✅ Frontend build integrated into deployment process

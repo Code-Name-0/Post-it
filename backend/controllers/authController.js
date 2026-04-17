@@ -1,11 +1,11 @@
 const bcrypt = require('bcrypt');
-const jwt    = require('jsonwebtoken');
-const User   = require('../models/User');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-// Secure dès que SSL est configuré (dev HTTPS inclus), strict pour bloquer les requêtes cross-site
+// Secure cookies in production (Railway handles HTTPS at edge)
 const cookieOpts = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production' || !!(process.env.SSL_KEY_PATH || process.env.SSL_CERT_PATH),
+  secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict',
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
@@ -23,7 +23,7 @@ const signup = async (req, res) => {
       return res.status(409).json({ error: 'Nom d\'utilisateur déjà pris' });
 
     const hashed = await bcrypt.hash(password, 12);
-    const user   = await User.create({ username: username.trim(), password: hashed });
+    const user = await User.create({ username: username.trim(), password: hashed });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.cookie('token', token, cookieOpts);
