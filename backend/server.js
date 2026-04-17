@@ -23,8 +23,12 @@ const isProd = process.env.NODE_ENV === 'production';
 app.use(helmet());
 
 // ── CORS strict : autorise uniquement le frontend avec cookies ─────────────────
+const corsOrigin = process.env.NODE_ENV === 'production'
+  ? process.env.CLIENT_URL || true  // En production, accepte tout (même origin)
+  : process.env.CLIENT_URL || 'http://localhost:5173';
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: corsOrigin,
   credentials: true,
 }));
 app.use(express.json());
@@ -38,11 +42,22 @@ if (isProd) {
   });
 }
 
-// ── Routes ─────────────────────────────────────────────────────────────────────
+// ── Routes API ────────────────────────────────────────────────────────────────
 app.use('/api', authRoutes);
 app.use('/api', boardRoutes);
 app.use('/api', postitRoutes);
 app.use('/api/admin', adminRoutes);
+
+// ── Static Files (Frontend) ────────────────────────────────────────────────────
+const path = require('path');
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+if (fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath));
+  // SPA fallback: toutes les routes non-API redirigent vers index.html (React Router)
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+}
 
 // ── Démarrage après connexion DB ───────────────────────────────────────────────
 connectDB().then(async () => {
