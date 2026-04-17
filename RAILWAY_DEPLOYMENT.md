@@ -38,16 +38,21 @@ NODE_ENV=production
 
 ### 4. Configure Build Settings in Railway
 
-In Railway dashboard → Settings → Build:
+Railway will automatically detect your `package.json` and use:
 
-- **Build Command**: `npm run build` (uses the Node.js build script)
-- **Start Command**: `npm start`
-- **Root Directory**: Leave empty (uses root package.json)
+- **Build Command**: `npm run build` (automatically from root package.json)
+- **Start Command**: `npm start` (automatically from root package.json)
 
-The build script (`build.js`) automatically handles:
-1. Installing frontend dependencies
-2. Building frontend to `frontend/dist/`
-3. Installing backend dependencies
+This runs:
+```bash
+# Build phase
+npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend
+
+# Start phase  
+npm start --prefix backend  (starts Express on PORT)
+```
+
+No additional configuration needed!
 
 ### 5. Deploy
 Push to GitHub:

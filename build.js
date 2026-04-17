@@ -13,34 +13,34 @@ const rootDir = __dirname;
 const frontendDir = path.join(rootDir, 'frontend');
 const backendDir = path.join(rootDir, 'backend');
 
-console.log('🏗️  Building Post-it application for Railway...\n');
+console.log('Building Post-it application for Railway...\n');
 
 try {
-  // Step 1: Build frontend
-  if (!fs.existsSync(frontendDir)) {
-    throw new Error(`Frontend directory not found: ${frontendDir}`);
-  }
+    // Step 1: Build frontend
+    if (!fs.existsSync(frontendDir)) {
+        throw new Error('Frontend directory not found: ' + frontendDir);
+    }
 
-  console.log('📦 Installing frontend dependencies...');
-  execSync('npm install', { cwd: frontendDir, stdio: 'inherit' });
+    console.log('Installing frontend dependencies...');
+    execSync('npm install', { cwd: frontendDir, stdio: 'inherit' });
 
-  console.log('\n🔨 Building frontend...');
-  execSync('npm run build', { cwd: frontendDir, stdio: 'inherit' });
+    console.log('\nBuilding frontend...');
+    execSync('npm run build', { cwd: frontendDir, stdio: 'inherit' });
 
-  // Step 2: Install backend dependencies
-  if (!fs.existsSync(backendDir)) {
-    throw new Error(`Backend directory not found: ${backendDir}`);
-  }
+    // Step 2: Install backend dependencies
+    if (!fs.existsSync(backendDir)) {
+        throw new Error('Backend directory not found: ' + backendDir);
+    }
 
-  console.log('\n📦 Installing backend dependencies...');
-  execSync('npm install', { cwd: backendDir, stdio: 'inherit' });
+    console.log('\nInstalling backend dependencies...');
+    execSync('npm install', { cwd: backendDir, stdio: 'inherit' });
 
-  console.log('\n✅ Build completed successfully!');
-  console.log('   Frontend dist: ' + path.join(frontendDir, 'dist'));
-  console.log('   Backend ready to start');
+    console.log('\nBuild completed successfully!');
+    console.log('Frontend dist: ' + path.join(frontendDir, 'dist'));
+    console.log('Backend ready to start');
 
 } catch (error) {
-  console.error('\n❌ Build failed:');
-  console.error(error.message);
-  process.exit(1);
+    console.error('\nBuild failed:');
+    console.error(error.message);
+    process.exit(1);
 }
