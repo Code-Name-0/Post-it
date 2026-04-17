@@ -31,12 +31,19 @@ app.use(cookieParser());
 // ── Serve static frontend files (production) ───────────────────────────────────
 if (isProd) {
   const frontendBuild = path.join(__dirname, '../frontend/dist');
-  console.log(`📁 Looking for frontend build at: ${frontendBuild}`);
+  const frontendBuildAlt = path.join(process.cwd(), 'frontend/dist');
   
+  let distPath = frontendBuild;
+  if (require('fs').existsSync(frontendBuildAlt)) {
+    distPath = frontendBuildAlt;
+  }
+  
+  console.log(`📁 Looking for frontend build at: ${distPath}`);
+
   const fs = require('fs');
-  if (fs.existsSync(frontendBuild)) {
+  if (fs.existsSync(distPath)) {
     console.log(`✅ Frontend dist folder found!`);
-    app.use(express.static(frontendBuild));
+    app.use(express.static(distPath));
 
     // Serve index.html for React Router
     app.get('*', (req, res, next) => {
@@ -44,11 +51,12 @@ if (isProd) {
       if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) {
         return next();
       }
-      res.sendFile(path.join(frontendBuild, 'index.html'));
+      res.sendFile(path.join(distPath, 'index.html'));
     });
   } else {
-    console.error(`❌ ERROR: Frontend dist folder NOT found at ${frontendBuild}`);
-    console.log(`   This means the frontend build failed or wasn't copied.`);
+    console.error(`❌ ERROR: Frontend dist folder NOT found at ${distPath}`);
+    console.log(`   Tried: ${frontendBuild}`);
+    console.log(`   Also tried: ${frontendBuildAlt}`);
   }
 }
 
