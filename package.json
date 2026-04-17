@@ -1,7 +1,6 @@
 {
-  "private": true,
-  "scripts": {
-    "start": "cd backend && npm start",
-    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install"
-  }
+    "private": true,
+    "scripts": {
+        "start": "cd frontend && npm install && npm run build && cd ../backend && npm install && npm start"
+    }
 }
