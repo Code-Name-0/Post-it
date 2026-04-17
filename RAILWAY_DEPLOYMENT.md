@@ -16,6 +16,8 @@ This setup deploys the entire Post-it application (backend + frontend) as a **si
 2. Create a free cluster (M0 tier)
 3. Create a database user with a password
 4. Get the connection string (looks like: `mongodb+srv://user:pass@cluster.mongodb.net/social-postit`)
+5. 
+mongodb+srv://root:<root>@cluster0.nsnausg.mongodb.net/?appName=Cluster0
 
 ### 2. Create Railway Project
 1. Go to [railway.app](https://railway.app)
@@ -36,11 +38,16 @@ NODE_ENV=production
 
 ### 4. Configure Build Settings in Railway
 
-In Railway dashboard → Deploy → Settings:
+In Railway dashboard → Settings → Build:
 
-- **Build Command**: `npm run build`
+- **Build Command**: `npm run build` (uses the Node.js build script)
 - **Start Command**: `npm start`
-- **Root Directory**: `backend` (or leave empty if using root package.json)
+- **Root Directory**: Leave empty (uses root package.json)
+
+The build script (`build.js`) automatically handles:
+1. Installing frontend dependencies
+2. Building frontend to `frontend/dist/`
+3. Installing backend dependencies
 
 ### 5. Deploy
 Push to GitHub:
@@ -55,9 +62,11 @@ Railway automatically deploys on GitHub push.
 ## How It Works
 
 ### Build Process
-1. Railway runs `npm run build` (from root package.json)
-2. This installs frontend dependencies and builds it to `frontend/dist/`
-3. This installs backend dependencies
+1. Railway executes `npm run build`
+2. This runs `build.js` (Node.js script with better error handling)
+3. build.js installs frontend dependencies and builds to `frontend/dist/`
+4. build.js installs backend dependencies
+5. Frontend is ready to be served as static files
 
 ### Runtime
 1. Railway runs `npm start` (starts backend)

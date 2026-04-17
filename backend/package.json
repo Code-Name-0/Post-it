@@ -9,8 +9,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "cd ../frontend && npm install && npm run build",
-    "heroku-postbuild": "cd ../frontend && npm install && npm run build"
+    "build": "node ../build.js || npm install --prefix ../frontend && npm run build --prefix ../frontend"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
