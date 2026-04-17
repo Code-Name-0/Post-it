@@ -31,16 +31,25 @@ app.use(cookieParser());
 // ── Serve static frontend files (production) ───────────────────────────────────
 if (isProd) {
   const frontendBuild = path.join(__dirname, '../frontend/dist');
-  app.use(express.static(frontendBuild));
+  console.log(`📁 Looking for frontend build at: ${frontendBuild}`);
+  
+  const fs = require('fs');
+  if (fs.existsSync(frontendBuild)) {
+    console.log(`✅ Frontend dist folder found!`);
+    app.use(express.static(frontendBuild));
 
-  // Serve index.html for React Router
-  app.get('*', (req, res, next) => {
-    // Don't intercept API routes
-    if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) {
-      return next();
-    }
-    res.sendFile(path.join(frontendBuild, 'index.html'));
-  });
+    // Serve index.html for React Router
+    app.get('*', (req, res, next) => {
+      // Don't intercept API routes
+      if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) {
+        return next();
+      }
+      res.sendFile(path.join(frontendBuild, 'index.html'));
+    });
+  } else {
+    console.error(`❌ ERROR: Frontend dist folder NOT found at ${frontendBuild}`);
+    console.log(`   This means the frontend build failed or wasn't copied.`);
+  }
 }
 
 // ── HSTS : force HTTPS pour les futures requêtes (production uniquement) ───────
