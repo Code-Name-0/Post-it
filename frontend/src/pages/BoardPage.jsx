@@ -8,39 +8,40 @@ import {
 } from '@heroicons/react/24/outline';
 import Board from '../components/Board';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../api.js';
 
 export default function BoardPage({ slug: defaultSlug }) {
   const { boardSlug } = useParams();
-  const slug          = boardSlug || defaultSlug || 'default';
-  const navigate      = useNavigate();
-  const { user }      = useAuth();
+  const slug = boardSlug || defaultSlug || 'default';
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const [board,   setBoard]   = useState(null);
-  const [boards,  setBoards]  = useState([]);
+  const [board, setBoard] = useState(null);
+  const [boards, setBoards] = useState([]);
   const [newSlug, setNewSlug] = useState('');
   const [newName, setNewName] = useState('');
-  const [error,   setError]   = useState('');
+  const [error, setError] = useState('');
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     setBoard(null);
     setError('');
-    fetch(`/api/boards/${slug}`, { credentials: 'include' })
+    fetch(`${API_BASE_URL}/api/boards/${slug}`, { credentials: 'include' })
       .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
       .then(setBoard)
       .catch(() => setError(`Tableau "${slug}" introuvable`));
   }, [slug]);
 
   useEffect(() => {
-    fetch('/api/boards', { credentials: 'include' })
+    fetch(`${API_BASE_URL}/api/boards`, { credentials: 'include' })
       .then((r) => r.json())
       .then(setBoards)
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const handleCreateBoard = async (e) => {
     e.preventDefault();
-    const res = await fetch('/api/boards', {
+    const res = await fetch(`${API_BASE_URL}/api/boards`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -120,81 +121,81 @@ export default function BoardPage({ slug: defaultSlug }) {
 }
 
 const styles = {
-  layout:   { display: 'flex', flex: 1, overflow: 'hidden' },
+  layout: { display: 'flex', flex: 1, overflow: 'hidden' },
   sidebar: {
-    width:         210,
-    background:    '#111827',
-    borderRight:   '1px solid rgba(255,255,255,0.06)',
-    padding:       '16px 10px',
-    overflowY:     'auto',
-    flexShrink:    0,
-    display:       'flex',
+    width: 210,
+    background: '#111827',
+    borderRight: '1px solid rgba(255,255,255,0.06)',
+    padding: '16px 10px',
+    overflowY: 'auto',
+    flexShrink: 0,
+    display: 'flex',
     flexDirection: 'column',
   },
   sideHeader: {
-    display:     'flex',
-    alignItems:  'center',
-    gap:         6,
-    padding:     '0 6px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    padding: '0 6px',
     marginBottom: 8,
   },
   sideTitle: {
-    fontSize:      10,
-    color:         '#6b7280',
+    fontSize: 10,
+    color: '#6b7280',
     textTransform: 'uppercase',
     letterSpacing: 1.4,
-    fontWeight:    700,
-    margin:        0,
+    fontWeight: 700,
+    margin: 0,
   },
-  list:  { listStyle: 'none', padding: 0, margin: '0 0 12px' },
+  list: { listStyle: 'none', padding: 0, margin: '0 0 12px' },
   boardBtn: {
-    width:        '100%',
-    textAlign:    'left',
-    background:   'transparent',
-    border:       'none',
-    padding:      '7px 10px',
-    cursor:       'pointer',
+    width: '100%',
+    textAlign: 'left',
+    background: 'transparent',
+    border: 'none',
+    padding: '7px 10px',
+    cursor: 'pointer',
     borderRadius: 6,
-    fontSize:     13,
-    color:        '#9ca3af',
-    display:      'flex',
-    alignItems:   'center',
-    gap:          8,
+    fontSize: 13,
+    color: '#9ca3af',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
   },
   boardBtnActive: {
     background: 'rgba(250,204,21,0.1)',
-    color:      '#facc15',
+    color: '#facc15',
     fontWeight: 600,
   },
   boardDot: {
     width: 6, height: 6,
     borderRadius: '50%',
-    flexShrink:   0,
+    flexShrink: 0,
   },
-  createForm:  { display: 'flex', flexDirection: 'column', gap: 5, padding: '4px 2px', marginTop: 4 },
+  createForm: { display: 'flex', flexDirection: 'column', gap: 5, padding: '4px 2px', marginTop: 4 },
   createInput: { padding: '6px 9px', borderRadius: 6, border: '1px solid #374151', fontSize: 12, background: '#1f2937', color: '#e5e7eb', outline: 'none' },
-  createBtn:   {
+  createBtn: {
     flex: 1, background: '#facc15', border: 'none', borderRadius: 6,
     padding: '6px', cursor: 'pointer', color: '#111827',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
-  cancelBtn:   {
+  cancelBtn: {
     flex: 1, background: '#374151', border: 'none', borderRadius: 6,
     padding: '6px', cursor: 'pointer', color: '#9ca3af',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   newBoardBtn: {
-    marginTop:      8,
-    background:     'transparent',
-    border:         '1px dashed #374151',
-    borderRadius:   6,
-    padding:        '7px 10px',
-    cursor:         'pointer',
-    color:          '#6b7280',
-    fontSize:       12,
-    width:          '100%',
-    display:        'flex',
-    alignItems:     'center',
-    gap:            6,
+    marginTop: 8,
+    background: 'transparent',
+    border: '1px dashed #374151',
+    borderRadius: 6,
+    padding: '7px 10px',
+    cursor: 'pointer',
+    color: '#6b7280',
+    fontSize: 12,
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
   },
 };

@@ -15,65 +15,66 @@ import {
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../api.js';
 
 /* ── Définition des rôles ──────────────────────────────────────── */
 const ROLES = ['guest', 'creator', 'editor', 'eraser', 'admin'];
 
 const ROLE_META = {
   guest: {
-    label:  'Guest',
-    desc:   'Peut consulter le tableau sans aucune interaction.',
-    color:  { bg: '#f1f5f9', border: '#cbd5e1', text: '#475569', dot: '#94a3b8' },
-    Icon:   EyeIcon,
+    label: 'Guest',
+    desc: 'Peut consulter le tableau sans aucune interaction.',
+    color: { bg: '#f1f5f9', border: '#cbd5e1', text: '#475569', dot: '#94a3b8' },
+    Icon: EyeIcon,
   },
   creator: {
-    label:  'Creator',
-    desc:   'Peut créer des post-its et les déplacer sur le tableau.',
-    color:  { bg: '#eff6ff', border: '#bfdbfe', text: '#1d4ed8', dot: '#3b82f6' },
-    Icon:   PlusCircleIcon,
+    label: 'Creator',
+    desc: 'Peut créer des post-its et les déplacer sur le tableau.',
+    color: { bg: '#eff6ff', border: '#bfdbfe', text: '#1d4ed8', dot: '#3b82f6' },
+    Icon: PlusCircleIcon,
   },
   editor: {
-    label:  'Editor',
-    desc:   'Peut modifier le texte de ses post-its ou de tous si autorisé.',
-    color:  { bg: '#f0fdf4', border: '#bbf7d0', text: '#15803d', dot: '#22c55e' },
-    Icon:   PencilIcon,
+    label: 'Editor',
+    desc: 'Peut modifier le texte de ses post-its ou de tous si autorisé.',
+    color: { bg: '#f0fdf4', border: '#bbf7d0', text: '#15803d', dot: '#22c55e' },
+    Icon: PencilIcon,
   },
   eraser: {
-    label:  'Eraser',
-    desc:   'Peut supprimer des post-its en plus des droits éditeur.',
-    color:  { bg: '#fff7ed', border: '#fed7aa', text: '#c2410c', dot: '#f97316' },
-    Icon:   TrashIcon,
+    label: 'Eraser',
+    desc: 'Peut supprimer des post-its en plus des droits éditeur.',
+    color: { bg: '#fff7ed', border: '#fed7aa', text: '#c2410c', dot: '#f97316' },
+    Icon: TrashIcon,
   },
   admin: {
-    label:  'Admin',
-    desc:   'Accès complet : gestion des rôles, tableaux et contenu.',
-    color:  { bg: '#fdf4ff', border: '#e9d5ff', text: '#7e22ce', dot: '#a855f7' },
-    Icon:   ShieldCheckIcon,
+    label: 'Admin',
+    desc: 'Accès complet : gestion des rôles, tableaux et contenu.',
+    color: { bg: '#fdf4ff', border: '#e9d5ff', text: '#7e22ce', dot: '#a855f7' },
+    Icon: ShieldCheckIcon,
   },
 };
 
 /* Matrice de permissions */
 const PERMISSIONS = [
-  { label: 'Consulter les post-its',      roles: ['guest','creator','editor','eraser','admin'] },
-  { label: 'Créer des post-its',          roles: ['creator','editor','eraser','admin'] },
-  { label: 'Déplacer ses post-its',       roles: ['creator','editor','eraser','admin'] },
-  { label: 'Modifier le texte',           roles: ['editor','eraser','admin'] },
-  { label: 'Supprimer des post-its',      roles: ['eraser','admin'] },
-  { label: 'Accès au panneau admin',      roles: ['admin'] },
+  { label: 'Consulter les post-its', roles: ['guest', 'creator', 'editor', 'eraser', 'admin'] },
+  { label: 'Créer des post-its', roles: ['creator', 'editor', 'eraser', 'admin'] },
+  { label: 'Déplacer ses post-its', roles: ['creator', 'editor', 'eraser', 'admin'] },
+  { label: 'Modifier le texte', roles: ['editor', 'eraser', 'admin'] },
+  { label: 'Supprimer des post-its', roles: ['eraser', 'admin'] },
+  { label: 'Accès au panneau admin', roles: ['admin'] },
 ];
 
 /* ── Composant principal ───────────────────────────────────────── */
 export default function AdminPage() {
   const { user: me } = useAuth();
-  const [users,   setUsers]   = useState([]);
-  const [error,   setError]   = useState('');
-  const [info,    setInfo]    = useState('');
+  const [users, setUsers] = useState([]);
+  const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
   const [hovered, setHovered] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    fetch('/api/admin/users', { credentials: 'include' })
+    fetch(`${API_BASE_URL}/api/admin/users`, { credentials: 'include' })
       .then((r) => r.json())
       .then((data) => { setUsers(data); setLoading(false); })
       .catch(() => { setError('Erreur de chargement des utilisateurs'); setLoading(false); });
@@ -81,7 +82,7 @@ export default function AdminPage() {
 
   const changeRole = async (id, role) => {
     setError(''); setInfo('');
-    const res  = await fetch(`/api/admin/users/${id}/role`, {
+    const res = await fetch(`${API_BASE_URL}/api/admin/users/${id}/role`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -154,7 +155,7 @@ export default function AdminPage() {
 
           <div style={s.rolesGrid}>
             {ROLES.map((r) => {
-              const m    = ROLE_META[r];
+              const m = ROLE_META[r];
               const Icon = m.Icon;
               return (
                 <div key={r} style={{ ...s.roleCard, borderColor: m.color.border }}>
@@ -175,8 +176,8 @@ export default function AdminPage() {
                           <li key={p.label} style={{ ...s.permItem, opacity: has ? 1 : 0.35 }}>
                             <span style={{ ...s.permIcon, color: has ? '#22c55e' : '#94a3b8' }}>
                               {has
-                                ? <CheckIcon  width={12} height={12} />
-                                : <MinusIcon  width={12} height={12} />}
+                                ? <CheckIcon width={12} height={12} />
+                                : <MinusIcon width={12} height={12} />}
                             </span>
                             <span style={s.permLabel}>{p.label}</span>
                           </li>
@@ -221,8 +222,8 @@ export default function AdminPage() {
                 <tbody>
                   {users.map((u) => {
                     const isSelf = me && u._id === me.id;
-                    const m      = ROLE_META[u.role] || ROLE_META.guest;
-                    const RIcon  = m.Icon;
+                    const m = ROLE_META[u.role] || ROLE_META.guest;
+                    const RIcon = m.Icon;
                     const initials = u.username[0].toUpperCase();
                     return (
                       <tr
@@ -306,7 +307,7 @@ export default function AdminPage() {
 
 /* ── Styles ─────────────────────────────────────────────────────── */
 const s = {
-  page:      { flex: 1, background: '#f8fafc', overflowY: 'auto', padding: '32px 24px' },
+  page: { flex: 1, background: '#f8fafc', overflowY: 'auto', padding: '32px 24px' },
   container: { maxWidth: 1100, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 },
 
   /* En-tête */
@@ -318,16 +319,16 @@ const s = {
     boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
   },
   pageHeaderLeft: { display: 'flex', alignItems: 'center' },
-  pageTitleRow:   { display: 'flex', alignItems: 'center', gap: 14 },
+  pageTitleRow: { display: 'flex', alignItems: 'center', gap: 14 },
   pageIconBox: {
     width: 42, height: 42, borderRadius: 10,
     background: '#fdf4ff', border: '1.5px solid #e9d5ff',
     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
-  pageTitle:    { margin: 0, fontSize: 18, fontWeight: 800, color: '#0f172a' },
+  pageTitle: { margin: 0, fontSize: 18, fontWeight: 800, color: '#0f172a' },
   pageSubtitle: { margin: '3px 0 0', fontSize: 13, color: '#94a3b8' },
 
-  statsRow:  { display: 'flex', gap: 8, flexWrap: 'wrap' },
+  statsRow: { display: 'flex', gap: 8, flexWrap: 'wrap' },
   statChip: {
     display: 'flex', alignItems: 'center', gap: 6,
     padding: '6px 12px', borderRadius: 20,
@@ -348,8 +349,8 @@ const s = {
   },
 
   /* Sections */
-  section:     { display: 'flex', flexDirection: 'column', gap: 14 },
-  sectionTitle:{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' },
+  section: { display: 'flex', flexDirection: 'column', gap: 14 },
+  sectionTitle: { margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' },
   sectionDesc: { margin: 0, fontSize: 13, color: '#64748b', lineHeight: 1.6 },
 
   /* Grille des rôles */
@@ -374,10 +375,10 @@ const s = {
   roleCardName: { fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' },
   roleCardBody: { padding: '12px 14px' },
   roleCardDesc: { margin: '0 0 10px', fontSize: 12, color: '#64748b', lineHeight: 1.5 },
-  permList:     { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 5 },
-  permItem:     { display: 'flex', alignItems: 'center', gap: 6 },
-  permIcon:     { display: 'flex', alignItems: 'center', flexShrink: 0 },
-  permLabel:    { fontSize: 11, color: '#475569', lineHeight: 1.3 },
+  permList: { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 5 },
+  permItem: { display: 'flex', alignItems: 'center', gap: 6 },
+  permIcon: { display: 'flex', alignItems: 'center', flexShrink: 0 },
+  permLabel: { fontSize: 11, color: '#475569', lineHeight: 1.3 },
 
   /* Table */
   tableHeader: {
@@ -395,7 +396,7 @@ const s = {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     gap: 10, padding: '32px', color: '#94a3b8', fontSize: 14,
   },
-  table:  { width: '100%', borderCollapse: 'collapse' },
+  table: { width: '100%', borderCollapse: 'collapse' },
   th: {
     padding: '11px 16px', textAlign: 'left',
     background: '#f8fafc', borderBottom: '1.5px solid #e2e8f0',
@@ -426,11 +427,11 @@ const s = {
 
   /* Points de permission */
   permDots: { display: 'flex', gap: 5, alignItems: 'center' },
-  permDot:  { width: 8, height: 8, borderRadius: '50%' },
+  permDot: { width: 8, height: 8, borderRadius: '50%' },
 
   /* Cellule verrouillée */
   lockedCell: { display: 'flex', alignItems: 'center', gap: 6 },
-  lockedLabel:{ fontSize: 13, color: '#cbd5e1', fontStyle: 'italic' },
+  lockedLabel: { fontSize: 13, color: '#cbd5e1', fontStyle: 'italic' },
 
   /* Select */
   select: {

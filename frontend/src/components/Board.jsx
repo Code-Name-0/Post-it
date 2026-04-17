@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
+import { API_BASE_URL } from '../api.js';
 import {
   LockClosedIcon,
   CursorArrowRaysIcon,
@@ -16,11 +17,11 @@ const roleLevel = (role) => ROLE_HIERARCHY.indexOf(role || 'guest');
 
 export default function Board({ boardId, boardName }) {
   const { user } = useAuth();
-  const [postits,    setPostits]    = useState([]);
+  const [postits, setPostits] = useState([]);
   const [pendingPos, setPendingPos] = useState(null);
-  const [newText,    setNewText]    = useState('');
-  const [error,      setError]      = useState('');
-  const boardRef  = useRef(null);
+  const [newText, setNewText] = useState('');
+  const [error, setError] = useState('');
+  const boardRef = useRef(null);
   const socketRef = useRef(null);
 
   useEffect(() => {
@@ -28,10 +29,10 @@ export default function Board({ boardId, boardName }) {
     const socket = io({ path: '/socket.io', transports: ['websocket', 'polling'] });
     socketRef.current = socket;
     socket.emit('join:board', boardId);
-    socket.on('postit:added',   (p)               => setPostits((prev) => [...prev, p]));
-    socket.on('postit:updated', (updated)          => setPostits((prev) => prev.map((p) => p._id === updated._id ? updated : p)));
-    socket.on('postit:deleted', ({ _id })          => setPostits((prev) => prev.filter((p) => p._id !== _id)));
-    socket.on('postit:moved',   ({ _id, x, y, z_index }) =>
+    socket.on('postit:added', (p) => setPostits((prev) => [...prev, p]));
+    socket.on('postit:updated', (updated) => setPostits((prev) => prev.map((p) => p._id === updated._id ? updated : p)));
+    socket.on('postit:deleted', ({ _id }) => setPostits((prev) => prev.filter((p) => p._id !== _id)));
+    socket.on('postit:moved', ({ _id, x, y, z_index }) =>
       setPostits((prev) => prev.map((p) => p._id === _id ? { ...p, x, y, z_index } : p))
     );
     return () => { socket.emit('leave:board', boardId); socket.disconnect(); };
@@ -39,7 +40,7 @@ export default function Board({ boardId, boardName }) {
 
   useEffect(() => {
     if (!boardId) return;
-    fetch(`/api/liste/${boardId}`, { credentials: 'include' })
+    fetch(`${API_BASE_URL}/api/liste/${boardId}`, { credentials: 'include' })
       .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
       .then(setPostits)
       .catch(() => setError('Impossible de charger les post-its'));
@@ -57,7 +58,7 @@ export default function Board({ boardId, boardName }) {
     e.preventDefault();
     if (!newText.trim() || !pendingPos) return;
     try {
-      const res = await fetch('/api/ajouter', {
+      const res = await fetch(`${API_BASE_URL}/api/ajouter`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ text: newText.trim(), x: pendingPos.x, y: pendingPos.y, boardId }),
       });
@@ -67,13 +68,13 @@ export default function Board({ boardId, boardName }) {
     } catch { setError('Erreur réseau'); }
   };
 
-  const handleMove   = async (id, x, y) => {
-    await fetch(`/api/deplacer/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ x, y }) });
+  const handleMove = async (id, x, y) => {
+    await fetch(`${API_BASE_URL}/api/deplacer/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ x, y }) });
   };
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer ce post-it ?')) return;
     try {
-      const res = await fetch(`/api/effacer/${id}`, { method: 'DELETE', credentials: 'include' });
+      const res = await fetch(`${API_BASE_URL}/api/effacer/${id}`, { method: 'DELETE', credentials: 'include' });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setError(body.error || 'Erreur lors de la suppression');
@@ -84,8 +85,8 @@ export default function Board({ boardId, boardName }) {
       setError('Erreur réseau lors de la suppression');
     }
   };
-  const handleEdit   = async (id, text) => {
-    const res = await fetch(`/api/modifier/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ text }) });
+  const handleEdit = async (id, text) => {
+    const res = await fetch(`${API_BASE_URL}/api/modifier/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ text }) });
     if (!res.ok) setError('Erreur lors de la modification');
   };
 
@@ -141,8 +142,8 @@ export default function Board({ boardId, boardName }) {
           <div
             style={{
               ...s.popup,
-              left: Math.min(pendingPos.x, (boardRef.current?.clientWidth  || 600) - 220),
-              top:  Math.min(pendingPos.y, (boardRef.current?.clientHeight || 400) - 185),
+              left: Math.min(pendingPos.x, (boardRef.current?.clientWidth || 600) - 220),
+              top: Math.min(pendingPos.y, (boardRef.current?.clientHeight || 400) - 185),
             }}
             onMouseDown={(e) => e.stopPropagation()}
           >
@@ -196,147 +197,147 @@ const s = {
   wrapper: { display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' },
 
   header: {
-    display:        'flex',
-    alignItems:     'center',
+    display: 'flex',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    padding:        '0 20px',
-    height:         50,
-    background:     '#fff',
-    borderBottom:   '1px solid #e2e8f0',
-    flexShrink:     0,
-    gap:            12,
+    padding: '0 20px',
+    height: 50,
+    background: '#fff',
+    borderBottom: '1px solid #e2e8f0',
+    flexShrink: 0,
+    gap: 12,
   },
-  headerLeft:  { display: 'flex', alignItems: 'center', gap: 8 },
+  headerLeft: { display: 'flex', alignItems: 'center', gap: 8 },
   headerRight: { display: 'flex', alignItems: 'center', gap: 10 },
   title: { margin: 0, fontSize: 14, fontWeight: 700, color: '#1e293b' },
   badge: {
-    background:   '#f1f5f9',
-    color:        '#64748b',
-    fontSize:     11,
-    fontWeight:   600,
-    padding:      '2px 9px',
+    background: '#f1f5f9',
+    color: '#64748b',
+    fontSize: 11,
+    fontWeight: 600,
+    padding: '2px 9px',
     borderRadius: 20,
-    border:       '1px solid #e2e8f0',
+    border: '1px solid #e2e8f0',
   },
   hint: {
-    display:    'flex',
+    display: 'flex',
     alignItems: 'center',
-    gap:        5,
-    fontSize:   12,
-    color:      '#94a3b8',
+    gap: 5,
+    fontSize: 12,
+    color: '#94a3b8',
   },
   errBtn: {
-    display:      'flex',
-    alignItems:   'center',
-    gap:          5,
-    fontSize:     12,
-    color:        '#dc2626',
-    background:   '#fef2f2',
-    border:       '1px solid #fecaca',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 5,
+    fontSize: 12,
+    color: '#dc2626',
+    background: '#fef2f2',
+    border: '1px solid #fecaca',
     borderRadius: 6,
-    padding:      '4px 8px',
-    cursor:       'pointer',
+    padding: '4px 8px',
+    cursor: 'pointer',
   },
 
   /* ── Tableau blanc ── */
   board: {
-    flex:            1,
-    position:        'relative',
-    overflow:        'hidden',
-    background:      '#ffffff',
+    flex: 1,
+    position: 'relative',
+    overflow: 'hidden',
+    background: '#ffffff',
     backgroundImage: 'radial-gradient(circle, #e2e8f0 1.5px, transparent 1.5px)',
-    backgroundSize:  '24px 24px',
-    cursor:          'crosshair',
+    backgroundSize: '24px 24px',
+    cursor: 'crosshair',
   },
 
   /* ── État vide ── */
   empty: {
-    position:       'absolute',
-    top:            '50%',
-    left:           '50%',
-    transform:      'translate(-50%, -50%)',
-    textAlign:      'center',
-    pointerEvents:  'none',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    textAlign: 'center',
+    pointerEvents: 'none',
   },
-  emptyIcon:  { marginBottom: 12 },
+  emptyIcon: { marginBottom: 12 },
   emptyTitle: { margin: '0 0 6px', fontSize: 15, fontWeight: 600, color: '#94a3b8' },
-  emptySub:   { margin: 0, fontSize: 13, color: '#cbd5e1', maxWidth: 260, lineHeight: 1.6 },
+  emptySub: { margin: 0, fontSize: 13, color: '#cbd5e1', maxWidth: 260, lineHeight: 1.6 },
 
   /* ── Popup création ── */
   popup: {
-    position:     'absolute',
-    background:   '#fff',
+    position: 'absolute',
+    background: '#fff',
     borderRadius: 10,
-    boxShadow:    '0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
-    zIndex:       9999,
-    width:        220,
-    border:       '1px solid #e2e8f0',
-    overflow:     'hidden',
+    boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
+    zIndex: 9999,
+    width: 220,
+    border: '1px solid #e2e8f0',
+    overflow: 'hidden',
   },
   popupHeader: {
-    display:     'flex',
-    alignItems:  'center',
-    gap:         7,
-    padding:     '10px 12px 8px',
-    borderBottom:'1px solid #f1f5f9',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 7,
+    padding: '10px 12px 8px',
+    borderBottom: '1px solid #f1f5f9',
   },
   popupTitle: {
-    flex:       1,
-    fontSize:   12,
+    flex: 1,
+    fontSize: 12,
     fontWeight: 700,
-    color:      '#475569',
+    color: '#475569',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
   },
   popupClose: {
     background: 'transparent',
-    border:     'none',
-    cursor:     'pointer',
-    color:      '#94a3b8',
-    padding:    0,
-    display:    'flex',
+    border: 'none',
+    cursor: 'pointer',
+    color: '#94a3b8',
+    padding: 0,
+    display: 'flex',
     alignItems: 'center',
   },
   textarea: {
-    width:      '100%',
-    resize:     'none',
-    border:     'none',
+    width: '100%',
+    resize: 'none',
+    border: 'none',
     borderBottom: '1px solid #f1f5f9',
     background: '#fff',
-    fontSize:   13,
+    fontSize: 13,
     fontFamily: 'inherit',
-    outline:    'none',
-    padding:    '10px 12px',
+    outline: 'none',
+    padding: '10px 12px',
     lineHeight: 1.6,
-    boxSizing:  'border-box',
-    color:      '#1e293b',
+    boxSizing: 'border-box',
+    color: '#1e293b',
   },
   popupFooter: {
-    display:        'flex',
-    alignItems:     'center',
+    display: 'flex',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    padding:        '6px 10px 8px',
+    padding: '6px 10px 8px',
   },
   charCount: { fontSize: 10, color: '#cbd5e1' },
   popupBtns: { display: 'flex', gap: 6 },
   btnCancel: {
-    background:   '#f8fafc',
-    border:       '1px solid #e2e8f0',
+    background: '#f8fafc',
+    border: '1px solid #e2e8f0',
     borderRadius: 6,
-    padding:      '5px 10px',
-    cursor:       'pointer',
-    fontSize:     12,
-    color:        '#64748b',
-    fontWeight:   500,
+    padding: '5px 10px',
+    cursor: 'pointer',
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: 500,
   },
   btnAdd: {
-    background:   '#6366f1',
-    border:       'none',
+    background: '#6366f1',
+    border: 'none',
     borderRadius: 6,
-    padding:      '5px 12px',
-    cursor:       'pointer',
-    fontSize:     12,
-    color:        '#fff',
-    fontWeight:   700,
+    padding: '5px 12px',
+    cursor: 'pointer',
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: 700,
   },
 };
