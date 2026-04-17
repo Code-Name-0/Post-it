@@ -97,8 +97,10 @@ const movePostit = async (req, res) => {
     const postit = await PostIt.findById(req.params.id);
     if (!postit) return res.status(404).json({ error: 'Post-it introuvable' });
 
-    if (postit.author.toString() !== req.user._id.toString())
-      return res.status(403).json({ error: 'Seul l\'auteur peut déplacer ce post-it' });
+    const isAuthor = postit.author.toString() === req.user._id.toString();
+    const isAdmin  = req.user.role === 'admin';
+    if (!isAuthor && !isAdmin)
+      return res.status(403).json({ error: "Seul l'auteur ou un admin peut déplacer ce post-it" });
 
     postit.x = Math.max(0, x);
     postit.y = Math.max(0, y);

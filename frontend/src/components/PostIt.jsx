@@ -38,7 +38,7 @@ export default function PostIt({ postit, currentUser, onMove, onDelete, onEdit }
   const isAdmin = currentUser?.role === 'admin';
   const canEdit = isAdmin || (currentUser && roleLevel(currentUser.role) >= roleLevel('editor')) || isAuthor;
   const canDelete = isAdmin || (currentUser && roleLevel(currentUser.role) >= roleLevel('eraser')) || isAuthor;
-  const canMove = isAuthor && currentUser && roleLevel(currentUser.role) >= roleLevel('creator');
+  const canMove = currentUser && (isAuthor || isAdmin) && roleLevel(currentUser.role) >= roleLevel('creator');
 
   const wasEdited = postit.createdAt && postit.updatedAt &&
     new Date(postit.updatedAt) - new Date(postit.createdAt) > 3000;

@@ -13,6 +13,7 @@ import {
   LockClosedIcon,
   ArrowPathIcon,
   UserCircleIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../api.js';
@@ -61,6 +62,8 @@ const PERMISSIONS = [
   { label: 'Accès au panneau admin', roles: ['admin'] },
 ];
 
+const EMPTY_FORM = { username: '', password: '', role: 'creator' };
+
 export default function AdminPage() {
   const { user: me } = useAuth();
   const [users, setUsers] = useState([]);
@@ -68,6 +71,11 @@ export default function AdminPage() {
   const [info, setInfo] = useState('');
   const [hovered, setHovered] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [formError, setFormError] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -92,6 +100,46 @@ export default function AdminPage() {
       setTimeout(() => setInfo(''), 4000);
     } else {
       setError(data.error || 'Erreur lors de la mise à jour');
+    }
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    setFormError('');
+    setCreating(true);
+    const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(form),
+    });
+    const data = await res.json();
+    setCreating(false);
+    if (res.ok) {
+      setUsers((prev) => [data, ...prev]);
+      setForm(EMPTY_FORM);
+      setShowCreate(false);
+      setInfo(`Utilisateur "${data.username}" créé avec le rôle ${data.role}`);
+      setTimeout(() => setInfo(''), 4000);
+    } else {
+      setFormError(data.error || 'Erreur lors de la création');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    setError(''); setInfo('');
+    const res = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    const data = await res.json();
+    setConfirmDelete(null);
+    if (res.ok) {
+      setUsers((prev) => prev.filter((u) => u._id !== id));
+      setInfo('Utilisateur supprimé');
+      setTimeout(() => setInfo(''), 4000);
+    } else {
+      setError(data.error || 'Erreur lors de la suppression');
     }
   };
 
@@ -192,8 +240,86 @@ export default function AdminPage() {
             </div>
             <div style={s.tableHeaderRight}>
               <UsersIcon width={16} height={16} color="#94a3b8" />
+              <button style={s.createBtn} onClick={() => { setShowCreate(true); setFormError(''); setForm(EMPTY_FORM); }}>
+                <PlusCircleIcon width={15} height={15} />
+                Créer un utilisateur
+              </button>
             </div>
           </div>
+
+          {showCreate && (
+            <div style={s.modal}>
+              <div style={s.modalBox}>
+                <div style={s.modalHeader}>
+                  <span style={s.modalTitle}>Nouvel utilisateur</span>
+                  <button style={s.iconBtn} onClick={() => setShowCreate(false)}>
+                    <XMarkIcon width={18} height={18} color="#94a3b8" />
+                  </button>
+                </div>
+                <form onSubmit={handleCreate} style={s.form}>
+                  {formError && (
+                    <div style={s.alertErr}>
+                      <ExclamationCircleIcon width={15} height={15} /> {formError}
+                    </div>
+                  )}
+                  <label style={s.label}>Nom d'utilisateur</label>
+                  <input
+                    style={s.input}
+                    value={form.username}
+                    onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
+                    placeholder="ex: alice"
+                    required
+                    autoFocus
+                  />
+                  <label style={s.label}>Mot de passe</label>
+                  <input
+                    style={s.input}
+                    type="password"
+                    value={form.password}
+                    onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                    placeholder="Min. 6 caractères"
+                    required
+                  />
+                  <label style={s.label}>Rôle</label>
+                  <select
+                    style={s.select}
+                    value={form.role}
+                    onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
+                  >
+                    {ROLES.map((r) => (
+                      <option key={r} value={r}>{ROLE_META[r].label}</option>
+                    ))}
+                  </select>
+                  <div style={s.formActions}>
+                    <button type="button" style={s.cancelBtn} onClick={() => setShowCreate(false)}>Annuler</button>
+                    <button type="submit" style={s.submitBtn} disabled={creating}>
+                      {creating ? 'Création…' : 'Créer'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {confirmDelete && (
+            <div style={s.modal}>
+              <div style={{ ...s.modalBox, maxWidth: 380 }}>
+                <div style={s.modalHeader}>
+                  <span style={s.modalTitle}>Confirmer la suppression</span>
+                  <button style={s.iconBtn} onClick={() => setConfirmDelete(null)}>
+                    <XMarkIcon width={18} height={18} color="#94a3b8" />
+                  </button>
+                </div>
+                <p style={{ margin: '12px 0 20px', fontSize: 14, color: '#475569' }}>
+                  Supprimer l'utilisateur <strong>{confirmDelete.username}</strong> ? Cette action est irréversible.
+                </p>
+                <div style={s.formActions}>
+                  <button style={s.cancelBtn} onClick={() => setConfirmDelete(null)}>Annuler</button>
+                  <button style={s.deleteConfirmBtn} onClick={() => handleDelete(confirmDelete._id)}>Supprimer</button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div style={s.tableWrap}>
             {loading ? (
@@ -209,6 +335,7 @@ export default function AdminPage() {
                     <th style={s.th}>Rôle actuel</th>
                     <th style={s.th}>Permissions</th>
                     <th style={s.th}>Modifier le rôle</th>
+                    <th style={s.th}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -278,6 +405,22 @@ export default function AdminPage() {
                                 <option key={r} value={r}>{ROLE_META[r].label}</option>
                               ))}
                             </select>
+                          )}
+                        </td>
+
+                        <td style={s.td}>
+                          {isSelf || u.username === 'guest' ? (
+                            <div style={s.lockedCell}>
+                              <LockClosedIcon width={13} height={13} color="#cbd5e1" />
+                            </div>
+                          ) : (
+                            <button
+                              style={s.deleteBtn}
+                              title="Supprimer cet utilisateur"
+                              onClick={() => setConfirmDelete(u)}
+                            >
+                              <TrashIcon width={14} height={14} />
+                            </button>
                           )}
                         </td>
                       </tr>
@@ -416,5 +559,58 @@ const s = {
     border: '1.5px solid #e2e8f0', cursor: 'pointer',
     fontSize: 13, background: '#f8fafc', color: '#0f172a',
     outline: 'none',
+  },
+
+  createBtn: {
+    display: 'flex', alignItems: 'center', gap: 6,
+    padding: '7px 14px', borderRadius: 8,
+    background: '#7e22ce', color: '#fff',
+    border: 'none', cursor: 'pointer',
+    fontSize: 13, fontWeight: 600,
+  },
+  deleteBtn: {
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    padding: '6px', borderRadius: 7,
+    background: '#fef2f2', border: '1.5px solid #fca5a5',
+    color: '#dc2626', cursor: 'pointer',
+  },
+
+  modal: {
+    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    zIndex: 1000,
+  },
+  modalBox: {
+    background: '#fff', borderRadius: 14, padding: '24px',
+    width: '100%', maxWidth: 440,
+    boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+  },
+  modalHeader: {
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: { fontSize: 16, fontWeight: 800, color: '#0f172a' },
+  iconBtn: {
+    background: 'none', border: 'none', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', padding: 4,
+  },
+  form: { display: 'flex', flexDirection: 'column', gap: 12 },
+  label: { fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' },
+  input: {
+    padding: '9px 12px', borderRadius: 8, fontSize: 14,
+    border: '1.5px solid #e2e8f0', outline: 'none', color: '#0f172a',
+  },
+  formActions: { display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 },
+  cancelBtn: {
+    padding: '8px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+    background: '#f1f5f9', border: '1.5px solid #e2e8f0', cursor: 'pointer', color: '#475569',
+  },
+  submitBtn: {
+    padding: '8px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+    background: '#7e22ce', color: '#fff', border: 'none', cursor: 'pointer',
+  },
+  deleteConfirmBtn: {
+    padding: '8px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+    background: '#dc2626', color: '#fff', border: 'none', cursor: 'pointer',
   },
 };
